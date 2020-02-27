@@ -11,8 +11,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      builder: (ctx) => Products(),
+    // value if we don't depend on context
+    // ChangeNotifierProvider cleans up the data after widget is removed
+    return ChangeNotifierProvider.value(
+//      builder: (ctx) => Products(),
+      value: Products(),
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
