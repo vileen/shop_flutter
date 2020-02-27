@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'screens/cart_screen.dart';
 import 'screens/product_details.dart';
 import 'screens/products_overview_screen.dart';
 import 'providers/products.dart';
+import 'providers/cart.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,9 +15,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // value if we don't depend on context
     // ChangeNotifierProvider cleans up the data after widget is removed
-    return ChangeNotifierProvider.value(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
 //      builder: (ctx) => Products(),
-      value: Products(),
+          value: Products(),
+        ),
+        ChangeNotifierProvider.value(
+          value: Cart(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -35,6 +44,7 @@ class MyApp extends StatelessWidget {
         home: ProductsOverviewScreen(),
         routes: {
           ProductDetailsScreen.routeName: (ctx) => ProductDetailsScreen(),
+          CartScreen.routeName: (ctx) => CartScreen(),
         },
       ),
     );
