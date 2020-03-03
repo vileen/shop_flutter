@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
+import '../providers/products.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
@@ -49,7 +51,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _saveForm() {
-    _form.currentState.save();
+    final isValid = _form.currentState.validate();
+    if (isValid) {
+      _form.currentState.save();
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -76,6 +83,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a title.';
+                  }
+
+                  return null;
+                },
                 onSaved: (value) {
                   _editedProduct = Product(
                     title: value,
@@ -94,6 +108,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a price.';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Please enter a valid number.';
+                  }
+                  if (double.parse(value) <= 0) {
+                    return 'Please enter a number greater than zero.';
+                  }
+
+                  return null;
+                },
                 onSaved: (value) {
                   _editedProduct = Product(
                     price: double.parse(value),
@@ -109,6 +136,16 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 maxLines: 3,
                 focusNode: _descriptionFocusNode,
                 keyboardType: TextInputType.multiline,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a description.';
+                  }
+                  if (value.length < 10) {
+                    return 'Should be at least 10 characters long';
+                  }
+
+                  return null;
+                },
                 onSaved: (value) {
                   _editedProduct = Product(
                     price: _editedProduct.price,
@@ -132,11 +169,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     child: _imageUrlController.text.isEmpty
                         ? Text('Enter a URL')
                         : FittedBox(
-                            child: Image.network(
-                              _imageUrlController.text,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                      child: Image.network(
+                        _imageUrlController.text,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -147,6 +184,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       controller: _imageUrlController,
                       // since we want the value for the preview
                       onFieldSubmitted: (_) => _saveForm(),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter an image URL.';
+                        }
+                        if (!value.startsWith('http') &&
+                            !value.startsWith('https')) {
+                          return 'Please enter a valid URL.';
+                        }
+                        if (!value.endsWith('.png') &&
+                            !value.endsWith('.jpg') &&
+                            !value.endsWith('.jpeg')
+                        ) {
+                          return 'Please enter a valid image URL.';
+                        }
+
+                        return null;
+                      },
                       onSaved: (value) {
                         _editedProduct = Product(
                           price: _editedProduct.price,
