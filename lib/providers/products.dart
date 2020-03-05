@@ -132,13 +132,17 @@ class Products with ChangeNotifier {
       final url = 'https://flutter-update-1a011.firebaseio.com/products/$id.json';
 
       try {
-        http.patch(url, body: json.encode({
+        final response = await http.patch(url, body: json.encode({
           'title': newProduct.title,
           'description': newProduct.description,
           'price': newProduct.price,
           'imageUrl': newProduct.imageUrl,
           'isFavorite': newProduct.isFavorite,
         }));
+
+        if (response.statusCode >= 400) {
+          throw HttpException('Could not update product.');
+        }
 
         _items[prodIndex] = newProduct;
         notifyListeners();
